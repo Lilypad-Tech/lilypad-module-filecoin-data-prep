@@ -1,54 +1,61 @@
 {
-    "APIVersion": "V1beta1",
-    "Metadata": {
-        "CreatedAt": "0001-01-01T00:00:00Z",
-        "Requester": {}
+    "machine": {
+        "gpu": 0,
+        "cpu": 1000,
+        "ram": 100
     },
-    "Spec": {
-        "Deal": {
-            "Concurrency": 1
+    "job": {
+        "APIVersion": "V1beta1",
+        "Metadata": {
+            "CreatedAt": "0001-01-01T00:00:00Z",
+            "Requester": {}
         },
-        "Docker": {
-            "Entrypoint": [
-                "/usr/local/bin/data-prep", "fil-data-prep",
-                  "--size", "100000000000", "--metadata", "meta.csv",
-                  "--output", "/output/test", "/input"
+        "Spec": {
+            "Deal": {
+                "Concurrency": 1
+            },
+            "Docker": {
+                "Entrypoint": [
+                    "/usr/local/bin/data-prep", "fil-data-prep",
+                    "--size", "100000000000", "--metadata", "meta.csv",
+                    "--output", "/output/test", "/input"
+                ],
+                "Image": "quay.io/lilypad/go-fil-dataprep:v0.0.1",
+                "EnvironmentVariables": [
+                    "GOMAXPROCS=1"
+                ]
+            },
+            "Engine": "Docker",
+            "Network": {
+                "Type": "None"
+            },
+            "PublisherSpec": {
+                "Type": "Estuary"
+            },
+            "Resources": {
+                "GPU": ""
+            },
+            "Timeout": 1800,
+            "Verifier": "Noop",
+            "output": [
+                {
+                    "Name": "output",
+                    "StorageSource": "IPFS",
+                    "path": "/output"
+                }
             ],
-            "Image": "quay.io/lilypad/go-fil-dataprep:v0.0.1",
-            "EnvironmentVariables": [
-                "GOMAXPROCS=1"
+            "inputs": [
+                {
+                    "Name": "s3-input",
+                    "S3": {
+                        "Bucket": {{.S3Bucket}},
+                        "Key": {{.S3Key}},
+                        "Region": {{if .S3Region}}{{.S3Region}}{{else}}us-east1{{end}}
+                    },
+                    "StorageSource": "S3",
+                    "path": "/input"
+                }
             ]
-        },
-        "Engine": "Docker",
-        "Network": {
-            "Type": "None"
-        },
-        "PublisherSpec": {
-            "Type": "Estuary"
-        },
-        "Resources": {
-            "GPU": ""
-        },
-        "Timeout": 1800,
-        "Verifier": "Noop",
-        "output": [
-            {
-                "Name": "output",
-                "StorageSource": "IPFS",
-                "path": "/output"
-            }
-        ],
-        "inputs": [
-            {
-                "Name": "s3-input",
-                "S3": {
-                    "Bucket": {{.S3Bucket}},
-                    "Key": {{.S3Key}},
-                    "Region": {{if .S3Region}}{{.S3Region}}{{else}}us-east1{{end}}
-                },
-                "StorageSource": "S3",
-                "path": "/input"
-            }
-        ]
+        }
     }
 }
